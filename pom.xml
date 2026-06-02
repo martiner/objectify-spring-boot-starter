@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>objectify-spring-boot-starter</artifactId>
-    <version>0.2.0</version>
+    <version>0.2.1-SNAPSHOT</version>
     <name>${project.artifactId}</name>
     <description>Spring Boot auto-configuration for Objectify (Cloud Datastore)</description>
 
@@ -23,7 +23,7 @@
         <url>git@github.com:martiner/objectify-spring-boot-starter.git</url>
         <connection>scm:git:git@github.com:martiner/objectify-spring-boot-starter.git</connection>
         <developerConnection>scm:git:${basedir}</developerConnection>
-        <tag>objectify-spring-boot-starter-0.2.0</tag>
+        <tag>HEAD</tag>
     </scm>
     <developers>
         <developer>
