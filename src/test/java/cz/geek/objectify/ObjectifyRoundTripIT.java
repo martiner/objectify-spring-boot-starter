@@ -1,6 +1,7 @@
 package cz.geek.objectify;
 
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.ObjectifyFactory;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.util.Closeable;
 import org.junit.jupiter.api.Test;
@@ -28,7 +29,7 @@ class ObjectifyRoundTripIT {
     void saveAndLoad() {
         runner().run(ctx -> {
             assertThat(ctx).hasNotFailed();
-            com.googlecode.objectify.ObjectifyFactory factory = ctx.getBean(com.googlecode.objectify.ObjectifyFactory.class);
+            ObjectifyFactory factory = ctx.getBean(ObjectifyFactory.class);
 
             Long savedId;
             try (Closeable ignored = factory.begin()) {

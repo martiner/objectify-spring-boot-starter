@@ -5,8 +5,11 @@ import cz.geek.objectify.other.OtherEntity;
 import cz.geek.objectify.test.SampleEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.security.autoconfigure.web.servlet.SecurityFilterProperties;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -21,7 +24,7 @@ class ObjectifyAutoConfigurationTest {
     private ApplicationContextRunner baseRunner() {
         return new ApplicationContextRunner()
                 .withConfiguration(
-                        org.springframework.boot.autoconfigure.AutoConfigurations.of(ObjectifyAutoConfiguration.class))
+                        AutoConfigurations.of(ObjectifyAutoConfiguration.class))
                 .withPropertyValues("objectify.port=8484", "objectify.project=test-project");
     }
 
@@ -29,7 +32,7 @@ class ObjectifyAutoConfigurationTest {
     void portWithoutProjectFailsWithClearMessage() {
         new ApplicationContextRunner()
                 .withConfiguration(
-                        org.springframework.boot.autoconfigure.AutoConfigurations.of(ObjectifyAutoConfiguration.class))
+                        AutoConfigurations.of(ObjectifyAutoConfiguration.class))
                 .withPropertyValues("objectify.port=8484")
                 .run(ctx -> assertThat(ctx).getFailure()
                         .hasMessageContaining("objectify.project"));
@@ -69,7 +72,7 @@ class ObjectifyAutoConfigurationTest {
     void rule2_defaultPackageScanFindsEntity() {
         baseRunner()
                 .withInitializer(appCtx -> AutoConfigurationPackages.register(
-                        (org.springframework.beans.factory.support.BeanDefinitionRegistry) appCtx,
+                        (BeanDefinitionRegistry) appCtx,
                         "cz.geek.objectify.test"))
                 .run(ctx -> {
                     ObjectifyFactory factory = ctx.getBean(ObjectifyFactory.class);
@@ -91,7 +94,7 @@ class ObjectifyAutoConfigurationTest {
     void rule3_scanDisabledSkipsPackageEntities() {
         baseRunner()
                 .withInitializer(appCtx -> AutoConfigurationPackages.register(
-                        (org.springframework.beans.factory.support.BeanDefinitionRegistry) appCtx,
+                        (BeanDefinitionRegistry) appCtx,
                         "cz.geek.objectify.test"))
                 .withPropertyValues("objectify.entity-scan-enabled=false")
                 .run(ctx -> {
@@ -145,7 +148,7 @@ class ObjectifyAutoConfigurationTest {
             FilterRegistrationBean<ObjectifyFilter> filter =
                     (FilterRegistrationBean<ObjectifyFilter>) ctx.getBean(FilterRegistrationBean.class);
             assertThat(filter.getOrder())
-                    .isEqualTo(org.springframework.boot.security.autoconfigure.web.servlet.SecurityFilterProperties.DEFAULT_FILTER_ORDER - 1);
+                    .isEqualTo(SecurityFilterProperties.DEFAULT_FILTER_ORDER - 1);
         });
     }
 
