@@ -2,7 +2,6 @@ package cz.geek.objectify;
 
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.ObjectifyFactory;
-import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.util.Closeable;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -33,12 +32,12 @@ class ObjectifyRoundTripIT {
 
             Long savedId;
             try (Closeable ignored = factory.begin()) {
-                Key<RoundTripEntity> key = ObjectifyService.ofy().save().entity(new RoundTripEntity("hello")).now();
+                Key<RoundTripEntity> key = factory.ofy().save().entity(new RoundTripEntity("hello")).now();
                 savedId = key.getId();
             }
 
             try (Closeable ignored = factory.begin()) {
-                RoundTripEntity loaded = ObjectifyService.ofy().load().type(RoundTripEntity.class).id(savedId).now();
+                RoundTripEntity loaded = factory.ofy().load().type(RoundTripEntity.class).id(savedId).now();
                 assertThat(loaded).isNotNull();
                 assertThat(loaded.value).isEqualTo("hello");
             }
