@@ -24,6 +24,9 @@ public class ObjectifyAutoConfiguration {
 
     private static final String SECURITY_FILTER_CHAIN_CLASS = "org.springframework.security.web.SecurityFilterChain";
 
+    /** Fallback project id for the emulator, whose project is arbitrary (it is not matched against the client). */
+    private static final String DEFAULT_EMULATOR_PROJECT = "test";
+
     @Bean
     @ConditionalOnMissingBean
     public ObjectifyFactory objectifyFactory(
@@ -36,14 +39,11 @@ public class ObjectifyAutoConfiguration {
         if (props.getPort() == -1) {
             factory = new ObjectifyFactory();
         } else {
-            if (props.getProject().isBlank()) {
-                throw new IllegalStateException(
-                        "objectify.project must be set when objectify.port is configured");
-            }
+            String project = props.getProject().isBlank() ? DEFAULT_EMULATOR_PROJECT : props.getProject();
             factory = new ObjectifyFactory(
                     DatastoreOptions.newBuilder()
                             .setHost("http://localhost:" + props.getPort())
-                            .setProjectId(props.getProject())
+                            .setProjectId(project)
                             .build()
                             .getService()
             );

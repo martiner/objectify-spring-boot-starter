@@ -23,7 +23,7 @@ The starter auto-configures an `ObjectifyFactory` bean and registers a servlet f
 | Property | Default | Description |
 |---|---|---|
 | `objectify.port` | `-1` | Datastore emulator port. `-1` = production. |
-| `objectify.project` | `` | GCP project ID (required for emulator). |
+| `objectify.project` | `` | GCP project ID. For the emulator it is optional and defaults to `test` (the emulator does not match it against the client); in production the ambient GCP project is used. |
 | `objectify.filter-order` | auto | Servlet filter order. When Spring Security is on the classpath this defaults to just before Spring Security's filter chain (`SecurityFilterProperties.DEFAULT_FILTER_ORDER - 1`); otherwise unordered. Set explicitly to override. |
 | `objectify.entity-scan-enabled` | `true` | Enable classpath scanning for `@Entity` classes. Set to `false` to rely solely on `ObjectifyEntityProvider` beans. |
 
@@ -62,6 +62,63 @@ public class MyEntities implements ObjectifyEntityProvider {
 ```
 
 > **Note:** If you define your own `ObjectifyFactory` bean, the auto-configuration backs off entirely (including entity registration and `ObjectifyService.init`). Your bean takes full responsibility.
+
+## Testing — `@ObjectifyTest` slice
+
+`@ObjectifyTest` is a test slice in the spirit of `@DataJpaTest`: it disables full
+auto-configuration and applies only `ObjectifyAutoConfiguration`, giving you a ready-to-use
+`ObjectifyFactory` bean (entities scanned, `ObjectifyService` initialized). Regular
+`@Component` / `@Service` / `@Controller` beans are **not** loaded, so the context stays
+small and your application's other configuration (security, mail, …) is not required.
+
+Entities are discovered automatically from the base package of your application's
+`@SpringBootConfiguration` — exactly like `@DataJpaTest` finds `@Entity` classes.
+
+The slice support lives in the main artifact but its compile dependencies
+(`spring-boot-test`, `spring-test`, JUnit) are `optional`; you get them on the test
+classpath via `spring-boot-starter-test`.
+
+```java
+@ObjectifyTest
+class MyEntityRepositoryTest {
+
+    @Autowired
+    ObjectifyFactory factory;
+
+    @Test
+    void savesAndLoads() {
+        try (Closeable ignored = factory.begin()) {
+            Key<MyEntity> key = factory.ofy().save().entity(new MyEntity("a")).now();
+            assertThat(factory.ofy().load().key(key).now()).isNotNull();
+        }
+    }
+}
+```
+
+It works the same with Kotest (constructor injection via `SpringAutowireConstructorExtension`):
+
+```kotlin
+@ObjectifyTest
+class MyEntityRepositoryIT(factory: ObjectifyFactory) : FreeSpec({
+    val repo = MyEntityRepository(factory)
+    "loads by id" {
+        factory.begin().use { /* ... repo.load(id) ... */ }
+    }
+})
+```
+
+Point the test at the emulator with `objectify.port` (via the `properties` attribute or
+the environment); `objectify.project` is optional and defaults to `test`.
+
+Your own repository/`@Service` beans are not in the slice by default. Pull in specific
+ones when you need them injected:
+
+```java
+@ObjectifyTest(includeFilters = @Filter(type = ASSIGNABLE_TYPE, classes = MyEntityRepository.class))
+```
+
+or with `@Import(MyEntityRepository.class)` — otherwise just instantiate them with the
+injected factory.
 
 ## Releasing
 

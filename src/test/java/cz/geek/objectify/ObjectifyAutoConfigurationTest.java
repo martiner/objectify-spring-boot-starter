@@ -29,13 +29,12 @@ class ObjectifyAutoConfigurationTest {
     }
 
     @Test
-    void portWithoutProjectFailsWithClearMessage() {
+    void portWithoutProjectUsesDefaultProject() {
         new ApplicationContextRunner()
                 .withConfiguration(
                         AutoConfigurations.of(ObjectifyAutoConfiguration.class))
                 .withPropertyValues("objectify.port=8484")
-                .run(ctx -> assertThat(ctx).getFailure()
-                        .hasMessageContaining("objectify.project"));
+                .run(ctx -> assertThat(ctx).hasNotFailed().hasSingleBean(ObjectifyFactory.class));
     }
 
     @Test
