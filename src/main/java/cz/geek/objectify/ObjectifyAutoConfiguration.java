@@ -12,6 +12,7 @@ import org.springframework.boot.security.autoconfigure.web.servlet.SecurityFilte
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.ClassUtils;
 
 import java.util.LinkedHashSet;
@@ -33,7 +34,8 @@ public class ObjectifyAutoConfiguration {
             ObjectifyProperties props,
             ObjectProvider<ObjectifyEntityProvider> providers,
             ObjectProvider<ObjectifyEntityScanPackages> scanPackagesProvider,
-            BeanFactory beanFactory) {
+            BeanFactory beanFactory,
+            ResourceLoader resourceLoader) {
 
         ObjectifyFactory factory;
         if (props.getPort() == -1) {
@@ -63,7 +65,7 @@ public class ObjectifyAutoConfiguration {
             } else {
                 packages = List.of();
             }
-            entities.addAll(new ObjectifyEntityScanner().scan(packages));
+            entities.addAll(new ObjectifyEntityScanner(resourceLoader).scan(packages));
         }
 
         for (Class<?> cls : entities) {

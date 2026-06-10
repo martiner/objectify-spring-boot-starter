@@ -2,6 +2,7 @@ package cz.geek.objectify;
 
 import com.googlecode.objectify.annotation.Entity;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.util.ClassUtils;
 
@@ -13,9 +14,10 @@ class ObjectifyEntityScanner {
 
     private final ClassPathScanningCandidateComponentProvider scanner;
 
-    ObjectifyEntityScanner() {
+    ObjectifyEntityScanner(ResourceLoader resourceLoader) {
         scanner = new ClassPathScanningCandidateComponentProvider(false);
         scanner.addIncludeFilter(new AnnotationTypeFilter(Entity.class));
+        scanner.setResourceLoader(resourceLoader);
     }
 
     Set<Class<?>> scan(Collection<String> packages) {
