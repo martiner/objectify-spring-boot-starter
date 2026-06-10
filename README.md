@@ -25,7 +25,7 @@ The starter auto-configures an `ObjectifyFactory` bean and registers a servlet f
 | `objectify.port` | `-1` | Datastore emulator port. `-1` = production. |
 | `objectify.project` | `` | GCP project ID. For the emulator it is optional and defaults to `test` (the emulator does not match it against the client); in production the ambient GCP project is used. |
 | `objectify.filter-enabled` | `true` | Register the Objectify servlet filter. Set to `false` to disable it — useful when you want to manage sessions yourself (e.g. call `factory.begin()` around units of work, or register your own filter). |
-| `objectify.filter-order` | auto | Servlet filter order. When Spring Security is on the classpath this defaults to just before Spring Security's filter chain (`SecurityFilterProperties.DEFAULT_FILTER_ORDER - 1`); otherwise unordered. Set explicitly to override. |
+| `objectify.filter-order` | auto | Servlet filter order. When Spring Security is on the classpath this defaults to just before Spring Security's filter chain (`spring.security.filter.order - 1`); otherwise unordered. Set explicitly to override. |
 | `objectify.entity-scan-enabled` | `true` | Enable classpath scanning for `@Entity` classes. Set to `false` to rely solely on `ObjectifyEntityProvider` beans. |
 
 ## Registering entities

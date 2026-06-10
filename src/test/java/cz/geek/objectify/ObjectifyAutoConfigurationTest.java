@@ -186,6 +186,18 @@ class ObjectifyAutoConfigurationTest {
                 });
     }
 
+    @Test
+    void filterOrderRespectsCustomSecurityFilterOrder() {
+        webRunner()
+                .withPropertyValues("spring.security.filter.order=200")
+                .run(ctx -> {
+                    @SuppressWarnings("unchecked")
+                    FilterRegistrationBean<ObjectifyFilter> filter =
+                            (FilterRegistrationBean<ObjectifyFilter>) ctx.getBean(FilterRegistrationBean.class);
+                    assertThat(filter.getOrder()).isEqualTo(199);
+                });
+    }
+
     @Configuration
     static class SampleEntityProviderConfig {
         @Bean

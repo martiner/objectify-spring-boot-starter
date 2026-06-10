@@ -14,6 +14,7 @@ import org.springframework.boot.security.autoconfigure.web.servlet.SecurityFilte
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.ClassUtils;
 
@@ -83,25 +84,27 @@ public class ObjectifyAutoConfiguration {
     @ConditionalOnMissingBean(name = "objectifyFilter")
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     @ConditionalOnProperty(name = "objectify.filter-enabled", matchIfMissing = true)
-    public FilterRegistrationBean<ObjectifyFilter> objectifyFilter(ObjectifyFactory factory, ObjectifyProperties props) {
+    public FilterRegistrationBean<ObjectifyFilter> objectifyFilter(ObjectifyFactory factory, ObjectifyProperties props, Environment env) {
         FilterRegistrationBean<ObjectifyFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(new ObjectifyFilter(factory));
         registration.addUrlPatterns("/*");
-        Integer order = resolveFilterOrder(props);
+        Integer order = resolveFilterOrder(props, env);
         if (order != null) {
             registration.setOrder(order);
         }
         return registration;
     }
 
-    private Integer resolveFilterOrder(ObjectifyProperties props) {
+    private Integer resolveFilterOrder(ObjectifyProperties props, Environment env) {
         if (props.getFilterOrder() != null) {
             return props.getFilterOrder();
         }
         if (ClassUtils.isPresent(SECURITY_FILTER_CHAIN_CLASS, getClass().getClassLoader())) {
             // Spring Security is on the classpath — run the Objectify session filter before
             // Spring Security's filter chain so the session is open during security processing.
-            return SecurityFilterProperties.DEFAULT_FILTER_ORDER - 1;
+            int securityOrder = env.getProperty("spring.security.filter.order", Integer.class,
+                    SecurityFilterProperties.DEFAULT_FILTER_ORDER);
+            return securityOrder - 1;
         }
         return null;
     }
