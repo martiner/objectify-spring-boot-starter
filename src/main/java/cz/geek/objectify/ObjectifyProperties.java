@@ -5,9 +5,24 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "objectify")
 public class ObjectifyProperties {
 
+    /** Datastore emulator port. {@code -1} means production (no emulator). */
     private int port = -1;
+
+    /**
+     * GCP project ID. For the emulator this is optional and defaults to {@code test};
+     * in production the ambient GCP project is used.
+     */
     private String project = "";
+
+    /**
+     * Servlet filter order. When Spring Security is on the classpath this defaults to
+     * just before Spring Security's filter chain
+     * ({@code spring.security.filter.order - 1}); otherwise unordered.
+     * Set explicitly to override.
+     */
     private Integer filterOrder;
+
+    /** Whether to scan the classpath for {@code @Entity} classes. Defaults to {@code true}. */
     private boolean entityScanEnabled = true;
 
     public int getPort() {
