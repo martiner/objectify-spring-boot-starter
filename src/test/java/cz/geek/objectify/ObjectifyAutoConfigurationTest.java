@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.security.autoconfigure.web.servlet.SecurityFilterProperties;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.boot.test.context.runner.WebApplicationContextRunner;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.annotation.Bean;
@@ -28,6 +29,13 @@ class ObjectifyAutoConfigurationTest {
                 .withPropertyValues("objectify.port=8484", "objectify.project=test-project");
     }
 
+    private WebApplicationContextRunner webRunner() {
+        return new WebApplicationContextRunner()
+                .withConfiguration(
+                        AutoConfigurations.of(ObjectifyAutoConfiguration.class))
+                .withPropertyValues("objectify.port=8484", "objectify.project=test-project");
+    }
+
     @Test
     void portWithoutProjectUsesDefaultProject() {
         new ApplicationContextRunner()
@@ -39,9 +47,17 @@ class ObjectifyAutoConfigurationTest {
 
     @Test
     void beansAreCreated() {
-        baseRunner().run(ctx -> {
+        webRunner().run(ctx -> {
             assertThat(ctx).hasSingleBean(ObjectifyFactory.class);
             assertThat(ctx).hasSingleBean(FilterRegistrationBean.class);
+        });
+    }
+
+    @Test
+    void factoryCreatedInNonWebContext() {
+        baseRunner().run(ctx -> {
+            assertThat(ctx).hasSingleBean(ObjectifyFactory.class);
+            assertThat(ctx).doesNotHaveBean(FilterRegistrationBean.class);
         });
     }
 
@@ -55,6 +71,13 @@ class ObjectifyAutoConfigurationTest {
                     assertThat(props.getProject()).isEqualTo("my-project");
                     assertThat(props.getFilterOrder()).isEqualTo(10);
                 });
+    }
+
+    @Test
+    void filterDisabledByProperty() {
+        webRunner()
+                .withPropertyValues("objectify.filter-enabled=false")
+                .run(ctx -> assertThat(ctx).doesNotHaveBean(FilterRegistrationBean.class));
     }
 
     @Test
@@ -128,7 +151,7 @@ class ObjectifyAutoConfigurationTest {
 
     @Test
     void filterOrderIsSet() {
-        baseRunner()
+        webRunner()
                 .withPropertyValues("objectify.filter-order=5")
                 .run(ctx -> {
                     @SuppressWarnings("unchecked")
@@ -142,7 +165,7 @@ class ObjectifyAutoConfigurationTest {
     void filterDefaultsBeforeSecurityWhenSecurityOnClasspath() {
         // spring-security-web is on the test classpath, so with no explicit order the filter
         // should default to running just before Spring Security's filter chain.
-        baseRunner().run(ctx -> {
+        webRunner().run(ctx -> {
             @SuppressWarnings("unchecked")
             FilterRegistrationBean<ObjectifyFilter> filter =
                     (FilterRegistrationBean<ObjectifyFilter>) ctx.getBean(FilterRegistrationBean.class);
@@ -153,7 +176,7 @@ class ObjectifyAutoConfigurationTest {
 
     @Test
     void explicitFilterOrderOverridesSecurityDefault() {
-        baseRunner()
+        webRunner()
                 .withPropertyValues("objectify.filter-order=42")
                 .run(ctx -> {
                     @SuppressWarnings("unchecked")

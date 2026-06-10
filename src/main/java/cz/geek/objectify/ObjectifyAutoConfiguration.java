@@ -7,6 +7,8 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.security.autoconfigure.web.servlet.SecurityFilterProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -79,6 +81,8 @@ public class ObjectifyAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(name = "objectifyFilter")
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+    @ConditionalOnProperty(name = "objectify.filter-enabled", matchIfMissing = true)
     public FilterRegistrationBean<ObjectifyFilter> objectifyFilter(ObjectifyFactory factory, ObjectifyProperties props) {
         FilterRegistrationBean<ObjectifyFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(new ObjectifyFilter(factory));

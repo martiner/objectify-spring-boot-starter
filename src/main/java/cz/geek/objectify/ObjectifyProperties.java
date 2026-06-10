@@ -22,6 +22,9 @@ public class ObjectifyProperties {
      */
     private Integer filterOrder;
 
+    /** Whether to register the Objectify servlet filter. Defaults to {@code true}. */
+    private boolean filterEnabled = true;
+
     /** Whether to scan the classpath for {@code @Entity} classes. Defaults to {@code true}. */
     private boolean entityScanEnabled = true;
 
@@ -47,6 +50,14 @@ public class ObjectifyProperties {
 
     public void setFilterOrder(Integer filterOrder) {
         this.filterOrder = filterOrder;
+    }
+
+    public boolean isFilterEnabled() {
+        return filterEnabled;
+    }
+
+    public void setFilterEnabled(boolean filterEnabled) {
+        this.filterEnabled = filterEnabled;
     }
 
     public boolean isEntityScanEnabled() {
