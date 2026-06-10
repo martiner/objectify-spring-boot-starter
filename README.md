@@ -64,6 +64,10 @@ public class MyEntities implements ObjectifyEntityProvider {
 
 > **Note:** If you define your own `ObjectifyFactory` bean, the auto-configuration backs off entirely (including entity registration and `ObjectifyService.init`). Your bean takes full responsibility.
 
+> **Note:** To replace the auto-configured filter while keeping the factory, define a `FilterRegistrationBean` bean named exactly **`objectifyFilter`**. A bean registered under any other name will not replace the auto-configured one — both would be active.
+
+> **Warning (multi-context tests):** `ObjectifyService.init` is a global singleton. In a test suite that starts multiple Spring application contexts in the same JVM, whichever context was initialized last wins. Injecting `ObjectifyFactory` directly (rather than using the static `ObjectifyService.ofy()`) is the reliable approach in such scenarios.
+
 ## Testing — `@ObjectifyTest` slice
 
 `@ObjectifyTest` is a test slice in the spirit of `@DataJpaTest`: it disables full
